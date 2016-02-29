@@ -25,10 +25,21 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
+/*
+The CHIP-8 interpreter.
+
+Memory map:
+
+0x000 - 0x1FF: Interpreter (contains emulator font)
+0x050 - 0x0A0: Built in 4x5 pixel font (chars A-F)
+0x200 - 0xFFF: Program ROM and working RAM
+*/
+
 #ifndef CH_CH8_STATE_HPP_
 #define CH_CH8_STATE_HPP_
 
 #include <CHIP8/State.hpp>
+#include <CHIP8/ScreenData.hpp>
 
 class ChipEight final : public State
 {
@@ -40,8 +51,26 @@ public:
     void update(float) override;
     void draw(sf::RenderTarget&) const override;
 
-private:
+    void reset(); //TODO private? called when loading new prog automatically
 
+private:
+    using Opcode = sf::Uint16;
+
+    Opcode m_currentOpcode;
+    std::array<sf::Uint8, 4096u> m_memory;
+    std::array<sf::Uint8, 16u> m_registers; //< V registers 0 - F. F is used for carry flag, others are general purpose
+    sf::Uint16 m_indexRegister;
+    sf::Uint16 m_programCounter;
+    
+    sf::Uint8 m_delayTimer;
+    sf::Uint8 m_soundTimer;
+
+    std::array<sf::Uint16, 16u> m_stack;
+    sf::Uint16 m_stackPointer;
+
+    ScreenData m_screenData;
+
+    void loadFontset();
 };
 
 #endif //CH_CH8_STATE_HPP_
