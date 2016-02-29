@@ -25,12 +25,40 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <CHIP8/App.hpp>
+#ifndef CH_APP_HPP_
+#define CH_APP_HPP_
 
-int main()
+#include <CHIP8/State.hpp>
+#include <CHIP8/ChipEight.hpp>
+#include <CHIP8/MenuState.hpp>
+
+#include <SFML/Graphics/RenderWindow.hpp>
+
+#include <vector>
+
+class App final
 {
-    App app;
-    app.run();
+public:
+    App();
+    ~App() = default;
 
-    return 0;
-}
+    App(const App&) = delete;
+    App& operator = (const App&) = delete;
+
+    void run();
+
+private:
+
+    sf::RenderWindow m_renderWindow;
+
+    ChipEight m_chipEight;
+    MenuState m_menuState;
+
+    std::vector<State*> m_states;
+    std::vector<State::PendingAction> m_pendingActions;
+
+    void update(float);
+    void draw();
+};
+
+#endif //CH_APP_HPP_

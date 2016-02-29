@@ -25,12 +25,22 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <CHIP8/App.hpp>
+#ifndef CH_MENU_STATE_HPP_
+#define CH_MENU_STATE_HPP_
 
-int main()
+#include <CHIP8/State.hpp>
+
+class MenuState final : public State
 {
-    App app;
-    app.run();
+public:
+    MenuState();
+    ~MenuState() = default;
 
-    return 0;
-}
+    void handleEvent(const sf::Event&) override;
+    void update(float) override;
+    void draw(sf::RenderTarget&) const override;
+
+private:
+};
+
+#endif //CH_MENU_STATE_HPP_

@@ -25,12 +25,41 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <CHIP8/App.hpp>
+#ifndef CH_STATE_HPP_
+#define CH_STATE_HPP_
 
-int main()
+#include <memory>
+
+namespace sf
 {
-    App app;
-    app.run();
-
-    return 0;
+    class RenderTarget;
+    class Event;
 }
+
+class State
+{
+public:
+    State() = default;
+    virtual ~State() = default;
+
+    virtual void handleEvent(const sf::Event&) = 0;
+    virtual void update(float) = 0;
+    virtual void draw(sf::RenderTarget&) const = 0;
+
+    enum class Action
+    {
+        None,
+        Push,
+        Pop
+    };
+    
+    struct PendingAction final
+    {
+        Action action = Action::None;
+        State* state = nullptr;
+    };
+private:
+
+};
+
+#endif //CH_STATE_HPP_

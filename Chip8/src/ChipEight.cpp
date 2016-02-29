@@ -25,12 +25,28 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <CHIP8/App.hpp>
+#include <CHIP8/ChipEight.hpp>
 
-int main()
+#include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
+
+ChipEight::ChipEight()
 {
-    App app;
-    app.run();
 
-    return 0;
+}
+
+//public
+void ChipEight::handleEvent(const sf::Event& evt)
+{
+
+}
+
+void ChipEight::update(float dt)
+{
+
+}
+
+void ChipEight::draw(sf::RenderTarget& rt) const
+{
+
 }

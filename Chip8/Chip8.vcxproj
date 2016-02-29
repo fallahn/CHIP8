@@ -119,7 +119,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\ChipEight.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MenuState.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\CHIP8\App.hpp" />
+    <ClInclude Include="include\CHIP8\ChipEight.hpp" />
+    <ClInclude Include="include\CHIP8\MenuState.hpp" />
+    <ClInclude Include="include\CHIP8\State.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

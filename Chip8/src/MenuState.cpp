@@ -25,12 +25,28 @@ and must not be misrepresented as being the original software.
 source distribution.
 *********************************************************************/
 
-#include <CHIP8/App.hpp>
+#include <CHIP8/MenuState.hpp>
 
-int main()
+#include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Window/Event.hpp>
+
+MenuState::MenuState()
 {
-    App app;
-    app.run();
 
-    return 0;
+}
+
+//public
+void MenuState::handleEvent(const sf::Event& evt)
+{
+
+}
+
+void MenuState::update(float dt)
+{
+
+}
+
+void MenuState::draw(sf::RenderTarget& rt) const
+{
+
 }
