@@ -31,6 +31,7 @@ source distribution.
 #include <SFML/Graphics/RenderTarget.hpp>
 
 #include <cstring>
+#include <fstream>
 
 namespace
 {
@@ -87,6 +88,27 @@ void ChipEight::draw(sf::RenderTarget& rt) const
     rt.draw(m_screenData);
 }
 
+void ChipEight::load(const std::string& path)
+{
+    reset();
+
+    std::ifstream file(path, std::ios::in | std::ios::binary);
+    if (!file.fail() && file.good())
+    {
+        file.seekg(std::ios::end);
+        auto size = file.tellg();
+        file.seekg(std::ios::beg);
+
+        if (size > 0 && size < 2048) //TODO check we have the correct max size
+        {
+            file.read((char*)(&m_memory[512]), size);
+        }
+    }
+    file.close();
+    //TODO signal some kind of error
+}
+
+//private
 void ChipEight::reset()
 {
     std::memset(m_memory.data(), 0u, m_memory.size());
@@ -99,7 +121,6 @@ void ChipEight::reset()
     m_soundTimer = 0u;
 }
 
-//private
 void ChipEight::loadFontset()
 {
     for (auto i = 0u; i < fontset.size(); ++i)

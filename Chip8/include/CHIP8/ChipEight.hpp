@@ -41,6 +41,8 @@ Memory map:
 #include <CHIP8/State.hpp>
 #include <CHIP8/ScreenData.hpp>
 
+#include <string>
+
 class ChipEight final : public State
 {
 public:
@@ -51,7 +53,7 @@ public:
     void update(float) override;
     void draw(sf::RenderTarget&) const override;
 
-    void reset(); //TODO private? called when loading new prog automatically
+    void load(const std::string&);
 
 private:
     using Opcode = sf::Uint16;
@@ -70,6 +72,7 @@ private:
 
     ScreenData m_screenData;
 
+    void reset(); //TODO private? called when loading new prog automatically
     void loadFontset();
 };
 
