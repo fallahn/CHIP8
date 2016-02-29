@@ -37,8 +37,11 @@ if(UNIX)
   find_package(X11 REQUIRED)
 endif()
 
+find_package(SFGUI REQUIRED)
+
 include_directories(
   ${SFML_INCLUDE_DIR}
+  ${SFGUI_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}/include)
 
 if(X11_FOUND)
@@ -65,7 +68,8 @@ endif()
 
 target_link_libraries(CHIP8
   ${SFML_LIBRARIES}
-  ${SFML_DEPENDENCIES})
+  ${SFML_DEPENDENCIES}
+  ${SFGUI_LIBRARY})
 
 if(UNIX)
   target_link_libraries(CHIP8

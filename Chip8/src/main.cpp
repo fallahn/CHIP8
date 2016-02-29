@@ -28,24 +28,36 @@ source distribution.
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
 
+#include <SFGUI/SFGUI.hpp>
+#include <SFGUI/Button.hpp>
+#include <SFGUI/Window.hpp>
+#include <SFGUI/Desktop.hpp>
+
 int main()
 {
     sf::RenderWindow renderWindow({ 800, 600 }, "CHIP8");
+    sfg::SFGUI sfg;
+    auto button = sfg::Button::Create("buns");
+    auto window = sfg::Window::Create();
+    window->Add(button);
+    sfg::Desktop desktop;
+    desktop.Add(window);
 
     while (renderWindow.isOpen())
     {
         sf::Event evt;
         while (renderWindow.pollEvent(evt))
         {
+            desktop.HandleEvent(evt);
             if (evt.type == sf::Event::Closed)
             {
                 renderWindow.close();
             }
         }
-
+        desktop.Update(1.f);
 
         renderWindow.clear();
-
+        sfg.Display(renderWindow);
         renderWindow.display();
     }
 
