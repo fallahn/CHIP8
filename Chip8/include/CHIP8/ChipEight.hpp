@@ -49,6 +49,9 @@ public:
     ChipEight();
     ~ChipEight() = default;
 
+    ChipEight(const ChipEight&) = delete;
+    ChipEight& operator = (const ChipEight&) = delete;
+
     void handleEvent(const sf::Event&) override;
     void update(float) override;
     void draw(sf::RenderTarget&) const override;
@@ -58,7 +61,6 @@ public:
 private:
     using Opcode = sf::Uint16;
 
-    Opcode m_currentOpcode;
     std::array<sf::Uint8, 4096u> m_memory;
     std::array<sf::Uint8, 16u> m_registers; //< V registers 0 - F. F is used for carry flag, others are general purpose
     sf::Uint16 m_indexRegister;
@@ -72,8 +74,10 @@ private:
 
     ScreenData m_screenData;
 
-    void reset(); //TODO private? called when loading new prog automatically
+    void reset();
     void loadFontset();
+
+    void execute();
 };
 
 #endif //CH_CH8_STATE_HPP_

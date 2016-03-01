@@ -44,9 +44,6 @@ void App::run()
 
     m_states.push_back(&m_chipEight);
 
-    static const float timeStep = 1.f / 60.f; //important as CHIP-8 timers run at at 60Hz
-    float accumulator = 0.f;
-
     sf::Clock clock;
     sf::Event evt;
 
@@ -81,12 +78,7 @@ void App::run()
             }
         }
 
-        accumulator += clock.restart().asSeconds();
-        while (accumulator > timeStep)
-        {
-            update(timeStep);
-            accumulator -= timeStep;
-        }
+        update(clock.restart().asSeconds());
         draw();
     }
 
