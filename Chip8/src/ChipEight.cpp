@@ -34,6 +34,7 @@ source distribution.
 #include <cstring>
 #include <fstream>
 #include <random>
+#include <iostream>
 
 namespace
 {
@@ -75,7 +76,8 @@ ChipEight::ChipEight()
     loadFontset();
 
     //load in test rom
-    std::memcpy(&m_memory[0x200], testRom, 91); //remember to update the size when updating program!
+    std::cout << "Test ROM size: " << testRom.size() << std::endl;
+    std::memcpy(&m_memory[0x200], testRom.data(), testRom.size());
 }
 
 //public
@@ -88,7 +90,7 @@ void ChipEight::update(float dt)
 {
     execute();    
     
-    //we're using a fixed time step to counters can be decremented here
+    //we're using a fixed time step so counters can be decremented here
     static float timeAccumulator = 0.f;
     static const float timeStep = 1.f / 60.f;
 
@@ -97,7 +99,7 @@ void ChipEight::update(float dt)
     {
         if (m_delayTimer > 0) m_delayTimer--;
         if (m_soundTimer > 0) m_soundTimer--;
-
+        
         timeAccumulator -= timeStep;
     }
 }
@@ -175,7 +177,7 @@ void ChipEight::execute()
             break;
         //return from sub routine
         //restore the program counter from the stack
-        case 0x00E0:
+        case 0x000E:
             m_stackPointer--;
             m_programCounter = m_stack[m_stackPointer];
             m_programCounter += 2;
@@ -421,7 +423,7 @@ void ChipEight::execute()
             break;
         //0xFX0A wait for keypress and store it when received (blocking!!)
         case 0x000A:
-            //return;
+            return;
             m_programCounter += 2;
             break;
         //0xFX15 - sets delay timer to register X

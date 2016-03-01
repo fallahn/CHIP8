@@ -41,7 +41,7 @@ App::App()
 void App::run()
 {
     m_renderWindow.create({ 640, 480 }, "CHIP8");
-
+    
     m_states.push_back(&m_chipEight);
 
     sf::Clock clock;
@@ -78,6 +78,8 @@ void App::run()
             }
         }
 
+        //can update emulation as fast as possible
+        //because CHIP-8 uses an internal timer
         update(clock.restart().asSeconds());
         draw();
     }
