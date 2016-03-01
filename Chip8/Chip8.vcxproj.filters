@@ -47,5 +47,8 @@
     <ClInclude Include="include\CHIP8\ScreenData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\CHIP8\TestRom.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

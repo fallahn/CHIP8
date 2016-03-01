@@ -26,6 +26,7 @@ source distribution.
 *********************************************************************/
 
 #include <CHIP8/ChipEight.hpp>
+#include <CHIP8/TestRom.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -36,7 +37,7 @@ source distribution.
 
 namespace
 {
-    //fonts are 8px wide by 5 px high
+    //fonts are 4px wide by 5 px high
     //each byte represents one row in the char
     const std::array<sf::Uint8, 80u> fontset =
     {
@@ -72,6 +73,9 @@ ChipEight::ChipEight()
 {
     reset();
     loadFontset();
+
+    //load in test rom
+    std::memcpy(&m_memory[0x200], testRom, 91); //remember to update the size when updating program!
 }
 
 //public
@@ -114,7 +118,7 @@ void ChipEight::load(const std::string& path)
         auto size = file.tellg();
         file.seekg(0, file.beg);
 
-        if (size > 0 && size < 2048) //TODO check we have the correct max size
+        if (size > 0 && size < 3583) //0xFFF - 0x200
         {
             file.read((char*)(&m_memory[m_programCounter]), size);
         }
