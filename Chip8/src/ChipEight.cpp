@@ -127,11 +127,13 @@ void ChipEight::load(const std::string& path)
         else
         {
             //TODO signal some kind of error
+            std::cerr << "Failed reading file into RAM" << std::endl;
         }
     }
     else
     {
         //TODO signal some kind of error
+        std::cerr << "Failed opening file: " << path << std::endl;
     }
     file.close();    
 }
@@ -377,14 +379,15 @@ void ChipEight::execute()
         sf::Uint16 pixel = 0;
 
         m_registers[15] = 0;
+
         for (auto row = 0; row < height; ++row)
         {
             pixel = m_memory[m_indexRegister + row];
-            for (auto col = 0; col < 8; ++col)
+            for (auto col = 0; col < 4; ++col)
             {
                 if ((pixel & (0x80 >> col)) != 0)
                 {
-                    auto pxIndex = (x + col + ((y + row) * 64));
+                    auto pxIndex = ((y + row) * 64) + (col + x);
                     if (m_screenData[pxIndex] == 1)
                     {
                         m_registers[15] = 1;
