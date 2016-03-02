@@ -28,9 +28,9 @@ if(STATIC_SFML)
 endif()
 
 if(WIN32)
-  find_package(SFML 2 REQUIRED graphics window system main)
+  find_package(SFML 2 REQUIRED graphics window system audio main)
 else()
-  find_package(SFML 2 REQUIRED graphics window system)
+  find_package(SFML 2 REQUIRED graphics window system audio)
 endif()
 
 if(UNIX)

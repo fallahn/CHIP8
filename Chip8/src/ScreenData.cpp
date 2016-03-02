@@ -129,7 +129,7 @@ void ScreenData::enableHires(bool enable)
     }
     else
     {
-        if (m_pixelData = m_pixelDataLow.data()) return; //already set
+        if (m_pixelData == m_pixelDataLow.data()) return; //already set
 
         m_pixelData = m_pixelDataLow.data();
         m_pixelDataSize = m_pixelDataLow.size();

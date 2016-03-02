@@ -1,5 +1,5 @@
-CHIP8 - A CHIP-8 interpreter written in C++
--------------------------------------------
+CHIP8 - A CHIP-8 / SuperCHIP interpreter written in C++
+-------------------------------------------------------
 
 A small project implementing a [CHIP-8 interpreter](https://en.wikipedia.org/wiki/CHIP-8) using SFML for windowing and
 input. This is purely a learning exercise as a precursor to (hopefully) learning something about emulation of 8-bit 
