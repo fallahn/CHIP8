@@ -96,6 +96,7 @@ ChipEight::ChipEight()
 {
     reset();
     loadFontset();
+    initSound();
 
     //load in test rom
     std::cout << "Test ROM size: " << testRom.size() << std::endl;
@@ -229,7 +230,9 @@ void ChipEight::update(float dt)
     while (timeAccumulator >= timeStep)
     {
         if (m_delayTimer > 0) m_delayTimer--;
+
         if (m_soundTimer > 0) m_soundTimer--;
+        else m_beep.stop();
         
         timeAccumulator -= timeStep;
     }
@@ -270,6 +273,27 @@ void ChipEight::load(const std::string& path)
 }
 
 //private
+void ChipEight::initSound()
+{
+    float frequency = 880.f;
+    float updateRate = 22100.f;
+    float amplitude = 16000.f;
+    
+    float stepCount = updateRate / frequency;
+    float step = (6.284f) / stepCount;
+
+    std::vector<sf::Int16> wavetable;
+    for (float i = 0.f; i < stepCount; ++i)
+    {
+        wavetable.push_back(static_cast<sf::Int16>(std::sin(step * i) * amplitude));
+    }
+
+    m_soundBuffer.loadFromSamples(wavetable.data(), wavetable.size(), 1u, static_cast<sf::Uint32>(updateRate));
+
+    m_beep.setBuffer(m_soundBuffer);
+    m_beep.setLoop(true);
+}
+
 void ChipEight::reset()
 {
     std::memset(m_memory.data() + fontset.size(), 0u, m_memory.size() - fontset.size());
@@ -586,6 +610,7 @@ void ChipEight::execute()
         //0xFX18 - sets the sound  timer to register X
         case 0x0018:
             m_soundTimer = m_registers[(currentOpcode & 0x0F00) >> 8];
+            if (m_soundTimer > 0) m_beep.play();
             m_programCounter += 2;
             break;
         //0xFX1E - adds register X to I

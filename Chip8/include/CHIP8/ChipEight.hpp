@@ -41,6 +41,9 @@ Memory map:
 #include <CHIP8/State.hpp>
 #include <CHIP8/ScreenData.hpp>
 
+#include <SFML/Audio/Sound.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
+
 #include <string>
 
 class ChipEight final : public State
@@ -75,6 +78,10 @@ private:
     sf::Uint16 m_inputMask;
 
     ScreenData m_screenData;
+
+    sf::SoundBuffer m_soundBuffer;
+    sf::Sound m_beep;
+    void initSound();
 
     void reset();
     void loadFontset();
