@@ -325,28 +325,56 @@ void ChipEight::execute()
     default: break;
     //let's do these in order! :)
     case 0x0000:
-        switch (currentOpcode & 0x000F)
+        switch (currentOpcode & 0x00FF)
         {
         //0x00E0 - Clear Screen
-        case 0x0000:
+        case 0x00E0:
             m_screenData.clear();
             m_programCounter += 2;
             break;
         //return from sub routine
         //restore the program counter from the stack
-        case 0x000E:
+        case 0x00EE:
             m_stackPointer--;
             m_programCounter = m_stack[m_stackPointer];
             m_programCounter += 2;
             break;
-        default: break;
+        //0x00FB - SCHIP, scroll screen 4px right
+        case 0x00FB:
+            m_programCounter += 2;
+            break;
+        //0x00FC - SCHIP, scroll screen 4px left
+        case 0x00FC:
+            m_programCounter += 2;
+            break;
+        //0x00FD - SCHIP, exit
+        case 0x00FD:
+
+            break;
+        //0x00FE - SCHIP, disable high res mode
+        case 0x00FE:
+            m_screenData.enableHires(false);
+            m_programCounter += 2;
+            break;
+        //0x00FF - SCHIP, enable hi-res mode
+        case 0x00FF:
+            m_screenData.enableHires(true);
+            m_programCounter += 2;
+            break;
+        default:
+            if ((currentOpcode & 0x00F0) == 0x00C0)
+            {
+                //0x00CN - SCHIP, scroll scren down N lines
+                m_programCounter += 2;
+            }
+            break;
         }
         break;
-    //jump to address
+    //0x1NNN - jump to address
     case 0x1000:
         m_programCounter = currentOpcode & 0x0FFF;
         break;
-    //call sub routine
+    //0x2NNN - call sub routine
     case 0x2000:
         //store current position on stack so we can return to it
         m_stack[m_stackPointer++] = m_programCounter;
@@ -527,33 +555,40 @@ void ChipEight::execute()
     //each row of 8 pixels is read starting at address in register I
     //until I + N. Register 15 is set to 1 if any pixels are unset
     case 0xD000:
-    {
-        auto x = m_registers[(currentOpcode & 0x0F00) >> 8];
-        auto y = m_registers[(currentOpcode & 0x00F0) >> 4];
-        auto height = (currentOpcode & 0x000F);
-        sf::Uint16 pixel = 0;
-
-        m_registers[15] = 0;
-
-        for (auto row = 0; row < height; ++row)
+        switch(currentOpcode & 0x000F)
         {
-            pixel = m_memory[m_indexRegister + row];
-            for (auto col = 0; col < 8; ++col)
+            case 0x000:
+                //SCHIP draw 16x16 sprite
+                m_programCounter += 2;
+                break;
+            default: //CHIP-8
+
+            auto x = m_registers[(currentOpcode & 0x0F00) >> 8];
+            auto y = m_registers[(currentOpcode & 0x00F0) >> 4];
+            auto height = (currentOpcode & 0x000F);
+            sf::Uint16 pixel = 0;
+
+            m_registers[15] = 0;
+
+            for (auto row = 0; row < height; ++row)
             {
-                //if the bit for this pixel is set...
-                if ((pixel & (0x80 >> col)) != 0)
+                pixel = m_memory[m_indexRegister + row];
+                for (auto col = 0; col < 8; ++col)
                 {
-                    auto pxIndex = std::min(((y + row) * 64) + (col + x), 2047);
-                    if (m_screenData[pxIndex] == 1)
+                    //if the bit for this pixel is set...
+                    if ((pixel & (0x80 >> col)) != 0)
                     {
-                        m_registers[15] = 1;
+                        auto pxIndex = ((y + row) * m_screenData.getHorizontalPixelCount()) + (col + x);
+                        if (m_screenData[pxIndex] == 1)
+                        {
+                            m_registers[15] = 1;
+                        }
+                        m_screenData.setPixel(pxIndex, m_screenData[pxIndex] ^ 1);
                     }
-                    m_screenData.setPixel(pxIndex, m_screenData[pxIndex] ^ 1);
                 }
             }
+            m_programCounter += 2;
         }
-        m_programCounter += 2;
-    }
         break;
     case 0xE000:
         switch (currentOpcode & 0x00FF)
@@ -635,6 +670,10 @@ void ChipEight::execute()
             m_indexRegister = m_registers[(currentOpcode & 0x0F00) >> 8] * 0x5;
             m_programCounter += 2;
             break;
+        //0xFX30 - SCHIP. As FX29 but for 10px font
+        case 0x0030:
+            m_programCounter += 2;
+            break;
         //0xFX33 - stores the decimal representation of register X at I to I + 2
         case 0x0033:
         {
@@ -671,6 +710,13 @@ void ChipEight::execute()
             m_indexRegister += x + 1;
             m_programCounter += 2;
         }
+            break;
+        //0xFX75 - SCHIP as 0xFX55, but unclear what R is?
+        case 0x0075:
+            m_programCounter += 2;
+            break;
+        //0xFx85 - SCHIP as 0xFX65, but unclear what R is?
+            m_programCounter += 2;
             break;
         }
         break;

@@ -35,6 +35,7 @@ source distribution.
 #include <vector>
 //TODO this should check as many opcodes as possible
 //TODO display a pixel for each test passed
+//TODO instructions should start on even number addresses
 static const std::vector<sf::Uint8> testRom = //TODO convert to std::array
 {
     0x12, 0x47,                   //0x200 skip charset / subs and start program
@@ -98,12 +99,14 @@ static const std::vector<sf::Uint8> testRom = //TODO convert to std::array
     0x60, 0x1F,                   //0x28F set V0 to X coord
     0x22, 0x39,                   //0x291 goto draw/delay sub
     
-    0x62, 0x3C,                   //0x293 set V2 to 60
-    0xF2, 0x15,                   //0x295 set timer to V2
-    0x42, 0x00,                   //0x297 skip next if V2 not 0
-    0x12, 0x47,                   //0x299 goto start
-    0xF2, 0x07,                   //0x29B copy timer to V2
-    0x12, 0x97,                   //0x29D goto skip check
+    0x82, 0x14,                   //0x293 set V2 to 20
+    0xF2, 0x18,                   //0x295 set sound timer to V2
+    0x62, 0x3C,                   //0x297 set V2 to 60
+    0xF2, 0x15,                   //0x299 set timer to V2
+    0x42, 0x00,                   //0x29B skip next if V2 not 0
+    0x12, 0x47,                   //0x29D goto start
+    0xF2, 0x07,                   //0x29F copy timer to V2
+    0x12, 0x9B                    //0x2A1 goto skip check
 };
 
 //CHIP8 TEST OK!

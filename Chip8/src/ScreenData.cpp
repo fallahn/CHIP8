@@ -40,9 +40,15 @@ namespace
 }
 
 ScreenData::ScreenData(sf::Uint8 pixelSize)
-    : m_resolution(width * pixelSize, height * pixelSize)
+    : m_resolution          (width * pixelSize, height * pixelSize),
+    m_pixelData             (m_pixelDataLow.data()),
+    m_pixelDataSize         (m_pixelDataLow.size()),
+    m_vertexArray           (m_vertexArrayLow.data()),
+    m_vertexArraySize       (m_vertexArrayLow.size()),
+    m_horizontalPixelCount  (64)
 {
-    std::memset(m_pixelData.data(), 0, m_pixelData.size());
+    //init low res arrays
+    std::memset(m_pixelDataLow.data(), 0, m_pixelDataLow.size());
 
     for (auto y = 0u; y < height; ++y)
     {
@@ -52,14 +58,40 @@ ScreenData::ScreenData(sf::Uint8 pixelSize)
             sf::Vertex vertex;
             vertex.color = sf::Color::Black;
 
-            vertex.position = sf::Vector2f(x * pixelSize, y * pixelSize);
-            m_vertexArray[idx++] = vertex;
+            vertex.position = sf::Vector2f(static_cast<float>(x * pixelSize), static_cast<float>(y * pixelSize));
+            m_vertexArrayLow[idx++] = vertex;
             vertex.position.x += pixelSize;
-            m_vertexArray[idx++] = vertex;
+            m_vertexArrayLow[idx++] = vertex;
             vertex.position.y += pixelSize;
-            m_vertexArray[idx++] = vertex;
+            m_vertexArrayLow[idx++] = vertex;
             vertex.position.x -= pixelSize;
-            m_vertexArray[idx++] = vertex;
+            m_vertexArrayLow[idx++] = vertex;
+        }
+    }
+
+    //init high res arrays
+    std::memset(m_pixelDataHigh.data(), 0, m_pixelDataHigh.size());
+
+    sf::Uint8 width2 = width * 2;
+    sf::Uint8 height2 = height * 2;
+    float pixelSize2 = pixelSize / 2.f;
+
+    for (auto y = 0u; y < height2; ++y)
+    {
+        for (auto x = 0u; x < width2; ++x)
+        {
+            auto idx = (y * width2 + x) * 4;
+            sf::Vertex vertex;
+            vertex.color = sf::Color::Black;
+
+            vertex.position = sf::Vector2f(pixelSize2 * x, pixelSize2 * y);
+            m_vertexArrayHigh[idx++] = vertex;
+            vertex.position.x += pixelSize2;
+            m_vertexArrayHigh[idx++] = vertex;
+            vertex.position.y += pixelSize2;
+            m_vertexArrayHigh[idx++] = vertex;
+            vertex.position.x -= pixelSize2;
+            m_vertexArrayHigh[idx++] = vertex;
         }
     }
 }
@@ -67,6 +99,8 @@ ScreenData::ScreenData(sf::Uint8 pixelSize)
 //public
 void ScreenData::setPixel(std::size_t idx, sf::Uint8 value)
 {
+    idx = std::min(idx, m_pixelDataSize - 1);
+    
     assert(value < 2);
     m_pixelData[idx] = value;
 
@@ -78,6 +112,33 @@ void ScreenData::setPixel(std::size_t idx, sf::Uint8 value)
     m_vertexArray[idx++].color = colour;
     m_vertexArray[idx++].color = colour;
     m_vertexArray[idx++].color = colour;
+}
+
+void ScreenData::enableHires(bool enable)
+{
+    if (enable)
+    {
+        if (m_pixelData == m_pixelDataHigh.data()) return; //already set
+
+        m_pixelData = m_pixelDataHigh.data();
+        m_pixelDataSize = m_pixelDataHigh.size();
+        m_vertexArray = m_vertexArrayHigh.data();
+        m_vertexArraySize = m_vertexArrayHigh.size();
+
+        m_horizontalPixelCount = 128;
+    }
+    else
+    {
+        if (m_pixelData = m_pixelDataLow.data()) return; //already set
+
+        m_pixelData = m_pixelDataLow.data();
+        m_pixelDataSize = m_pixelDataLow.size();
+        m_vertexArray = m_vertexArrayLow.data();
+        m_vertexArraySize = m_vertexArrayLow.size();
+
+        m_horizontalPixelCount = 64;
+    }
+    clear();
 }
 
 void ScreenData::clear()
@@ -92,5 +153,5 @@ void ScreenData::clear()
 //private
 void ScreenData::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
-    rt.draw(m_vertexArray.data(), m_vertexArray.size(), sf::Quads, states);
+    rt.draw(m_vertexArray, m_vertexArraySize, sf::Quads, states);
 }

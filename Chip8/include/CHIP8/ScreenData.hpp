@@ -47,7 +47,8 @@ public:
     const sf::Uint8& operator [] (std::size_t idx) const { return m_pixelData[idx]; }
 
     void setPixel(std::size_t, sf::Uint8);
-
+    void enableHires(bool);
+    sf::Uint8 getHorizontalPixelCount() const { return m_horizontalPixelCount; }
     const sf::Vector2u& getResolution() const { return m_resolution; }
     void clear();
 
@@ -55,8 +56,18 @@ private:
 
     sf::Vector2u m_resolution; //< the actual resolution in SFML units
 
-    std::array<sf::Uint8, 2048u> m_pixelData; //<64 *  32 pixels, either on or off
-    std::array<sf::Vertex, 8192u> m_vertexArray; //<64 * 32 * 4 verts
+    std::array<sf::Uint8, 2048u> m_pixelDataLow; //<64 *  32 pixels, either on or off
+    std::array<sf::Vertex, 8192u> m_vertexArrayLow; //<64 * 32 * 4 verts
+
+    std::array<sf::Uint8, 8192u> m_pixelDataHigh; //<128 * 64 pixels
+    std::array<sf::Vertex, 32768> m_vertexArrayHigh; //<128 * 64 * 4 verts
+
+    sf::Uint8* m_pixelData;
+    std::size_t m_pixelDataSize;
+    sf::Vertex* m_vertexArray;
+    std::size_t m_vertexArraySize;
+    sf::Uint8 m_horizontalPixelCount;
+
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 

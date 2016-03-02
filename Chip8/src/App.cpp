@@ -41,7 +41,7 @@ App::App()
 void App::run()
 {
     m_renderWindow.create({ 640, 480 }, "CHIP8");
-
+    
     m_states.push_back(&m_chipEight);
 
     sf::Clock clock;
