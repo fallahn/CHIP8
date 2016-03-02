@@ -72,6 +72,8 @@ private:
     std::array<sf::Uint16, 16u> m_stack;
     sf::Uint16 m_stackPointer;
 
+    sf::Uint16 m_inputMask;
+
     ScreenData m_screenData;
 
     void reset();

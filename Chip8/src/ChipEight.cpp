@@ -63,6 +63,27 @@ namespace
     std::default_random_engine rndEngine(static_cast<unsigned long>(std::time(0)));
     std::uniform_int_distribution<unsigned short> distribution(0, 0xFF);
     sf::Uint16 randNext() { return distribution(rndEngine); }
+
+    //keyboard mapping - TODO make this configurable?
+    const sf::Keyboard::Key key0x1 = sf::Keyboard::Key::Num1;
+    const sf::Keyboard::Key key0x2 = sf::Keyboard::Key::Num2;
+    const sf::Keyboard::Key key0x3 = sf::Keyboard::Key::Num3;
+    const sf::Keyboard::Key key0xC = sf::Keyboard::Key::Num4;
+
+    const sf::Keyboard::Key key0x4 = sf::Keyboard::Key::Q;
+    const sf::Keyboard::Key key0x5 = sf::Keyboard::Key::W;
+    const sf::Keyboard::Key key0x6 = sf::Keyboard::Key::E;
+    const sf::Keyboard::Key key0xD = sf::Keyboard::Key::R;
+
+    const sf::Keyboard::Key key0x7 = sf::Keyboard::Key::A;
+    const sf::Keyboard::Key key0x8 = sf::Keyboard::Key::S;
+    const sf::Keyboard::Key key0x9 = sf::Keyboard::Key::D;
+    const sf::Keyboard::Key key0xE = sf::Keyboard::Key::F;
+
+    const sf::Keyboard::Key key0xA = sf::Keyboard::Key::Z;
+    const sf::Keyboard::Key key0x0 = sf::Keyboard::Key::X;
+    const sf::Keyboard::Key key0xB = sf::Keyboard::Key::C;
+    const sf::Keyboard::Key key0xF = sf::Keyboard::Key::V;
 }
 
 ChipEight::ChipEight()
@@ -70,7 +91,8 @@ ChipEight::ChipEight()
     m_programCounter    (0x200),
     m_delayTimer        (0u),
     m_soundTimer        (0u),
-    m_stackPointer      (0u)
+    m_stackPointer      (0u),
+    m_inputMask         (0u)
 {
     reset();
     loadFontset();
@@ -83,7 +105,116 @@ ChipEight::ChipEight()
 //public
 void ChipEight::handleEvent(const sf::Event& evt)
 {
-
+    if (evt.type == sf::Event::KeyPressed)
+    {
+        switch (evt.key.code)
+        {
+        default: break;
+        case key0x0:
+            m_inputMask |= (1 << 0x0);
+            break;
+        case key0x1:
+            m_inputMask |= (1 << 0x1);
+            break;
+        case key0x2:
+            m_inputMask |= (1 << 0x2);
+            break;
+        case key0x3:
+            m_inputMask |= (1 << 0x3);
+            break;
+        case key0x4:
+            m_inputMask |= (1 << 0x4);
+            break;
+        case key0x5:
+            m_inputMask |= (1 << 0x5);
+            break;
+        case key0x6:
+            m_inputMask |= (1 << 0x6);
+            break;
+        case key0x7:
+            m_inputMask |= (1 << 0x7);
+            break;
+        case key0x8:
+            m_inputMask |= (1 << 0x8);
+            break;
+        case key0x9:
+            m_inputMask |= (1 << 0x9);
+            break;
+        case key0xA:
+            m_inputMask |= (1 << 0xA);
+            break;
+        case key0xB:
+            m_inputMask |= (1 << 0xB);
+            break;
+        case key0xC:
+            m_inputMask |= (1 << 0xC);
+            break;
+        case key0xD:
+            m_inputMask |= (1 << 0xD);
+            break;
+        case key0xE:
+            m_inputMask |= (1 << 0xE);
+            break;
+        case key0xF:
+            m_inputMask |= (1 << 0xF);
+            break;
+        }
+    }
+    else if (evt.type == sf::Event::KeyReleased)
+    {
+        switch (evt.key.code)
+        {
+        default: break;
+        case key0x0:
+            m_inputMask &= ~(1 << 0x0);
+            break;
+        case key0x1:
+            m_inputMask &= ~(1 << 0x1);
+            break;
+        case key0x2:
+            m_inputMask &= ~(1 << 0x2);
+            break;
+        case key0x3:
+            m_inputMask &= ~(1 << 0x3);
+            break;
+        case key0x4:
+            m_inputMask &= ~(1 << 0x4);
+            break;
+        case key0x5:
+            m_inputMask &= ~(1 << 0x5);
+            break;
+        case key0x6:
+            m_inputMask &= ~(1 << 0x6);
+            break;
+        case key0x7:
+            m_inputMask &= ~(1 << 0x7);
+            break;
+        case key0x8:
+            m_inputMask &= ~(1 << 0x8);
+            break;
+        case key0x9:
+            m_inputMask &= ~(1 << 0x9);
+            break;
+        case key0xA:
+            m_inputMask &= ~(1 << 0xA);
+            break;
+        case key0xB:
+            m_inputMask &= ~(1 << 0xB);
+            break;
+        case key0xC:
+            m_inputMask &= ~(1 << 0xC);
+            break;
+        case key0xD:
+            m_inputMask &= ~(1 << 0xD);
+            break;
+        case key0xE:
+            m_inputMask &= ~(1 << 0xE);
+            break;
+        case key0xF:
+            m_inputMask &= ~(1 << 0xF);
+            break;
+        }
+    }
 }
 
 void ChipEight::update(float dt)
@@ -383,11 +514,12 @@ void ChipEight::execute()
         for (auto row = 0; row < height; ++row)
         {
             pixel = m_memory[m_indexRegister + row];
-            for (auto col = 0; col < 4; ++col)
+            for (auto col = 0; col < 8; ++col)
             {
+                //if the bit for this pixel is set...
                 if ((pixel & (0x80 >> col)) != 0)
                 {
-                    auto pxIndex = ((y + row) * 64) + (col + x);
+                    auto pxIndex = std::min(((y + row) * 64) + (col + x), 2047);
                     if (m_screenData[pxIndex] == 1)
                     {
                         m_registers[15] = 1;
@@ -405,13 +537,21 @@ void ChipEight::execute()
         default: break;
         //0xEX9E skips next instruction if key stored in register X is pressed
         case 0x009E:
-            //TODO add input register
+            if ((m_inputMask & (1 << m_registers[(currentOpcode & 0x0F00) >> 8])) != 0)
+            {
+                m_programCounter += 4;
+                break;
+            }
             m_programCounter += 2;
             break;
         //0xEXA1 - skips the next instruction of the key  stored in register X isn't pressed
         case 0x00A1:
-            //TODO add input register
-            m_programCounter += 4;
+            if ((m_inputMask & (1 << m_registers[(currentOpcode & 0x0F00) >> 8])) == 0)
+            {
+                m_programCounter += 4;
+                break;
+            }
+            m_programCounter += 2;
             break;
         }
         break;
@@ -426,8 +566,17 @@ void ChipEight::execute()
             break;
         //0xFX0A wait for keypress and store it when received (blocking!!)
         case 0x000A:
-            return;
-            m_programCounter += 2;
+        {
+            for (auto i = 0; i < 16; ++i)
+            {
+                if (m_inputMask & (1 << i))
+                {
+                    m_registers[(currentOpcode & 0x0F00) >> 8] = i;
+                    m_programCounter += 2;
+                    return;
+                }
+            }
+        }           
             break;
         //0xFX15 - sets delay timer to register X
         case 0x0015:
