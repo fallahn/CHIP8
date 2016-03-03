@@ -41,6 +41,8 @@ App::App()
 void App::run()
 {
     m_renderWindow.create({ 640, 480 }, "CHIP8");
+    m_renderWindow.setVerticalSyncEnabled(true);
+
     m_states.push_back(&m_chipEight);
 
     sf::Clock clock;
@@ -114,7 +116,7 @@ void App::update(float dt)
 
 void App::draw()
 {
-    m_renderWindow.clear();
+    m_renderWindow.clear(sf::Color(40u, 51u, 36u));
     for (const auto& state : m_states)
     {
         state->draw(m_renderWindow);
