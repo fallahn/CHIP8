@@ -32,6 +32,7 @@ source distribution.
 
 #include <cassert>
 #include <cstring>
+#include <iostream>
 
 namespace
 {
@@ -99,7 +100,7 @@ ScreenData::ScreenData(sf::Uint8 pixelSize)
 //public
 void ScreenData::setPixel(std::size_t idx, sf::Uint8 value)
 {
-    idx = std::min(idx, m_pixelDataSize - 1);
+    //idx = std::min(idx, m_pixelDataSize - 1);
     
     assert(value < 2);
     m_pixelData[idx] = value;
@@ -111,7 +112,7 @@ void ScreenData::setPixel(std::size_t idx, sf::Uint8 value)
     m_vertexArray[idx++].color = colour;
     m_vertexArray[idx++].color = colour;
     m_vertexArray[idx++].color = colour;
-    m_vertexArray[idx++].color = colour;
+    m_vertexArray[idx].color = colour;
 }
 
 void ScreenData::enableHires(bool enable)
@@ -141,16 +142,76 @@ void ScreenData::enableHires(bool enable)
     clear();
 }
 
+void ScreenData::scrollLeft()
+{
+    auto height = m_horizontalPixelCount / 2;
+    for (auto i = 0; i < height; ++i)
+    {
+        auto start = i * m_horizontalPixelCount;
+        for (auto j = start; j < start + (m_horizontalPixelCount - 4); ++j)
+        {
+            m_pixelData[j] = m_pixelData[j + 4];
+        }
+        std::memset(m_pixelData + start + (m_horizontalPixelCount - 5), 0, 4);
+    }
+    
+    updateVertices();
+}
+
+void ScreenData::scrollRight()
+{
+    auto height = m_horizontalPixelCount / 2;
+    for (auto i = 0; i < height; ++i)
+    {
+        auto start = i * m_horizontalPixelCount;
+        for (auto j = start + (m_horizontalPixelCount - 1); j >= (start + 4); --j)
+        {
+            m_pixelData[j] = m_pixelData[j - 4];
+        }
+        std::memset(m_pixelData + start, 0, 4);
+    }
+
+    updateVertices();
+}
+
+void ScreenData::scrollDown(sf::Uint8 amount)
+{
+    auto height = m_horizontalPixelCount / 2;
+    for (auto i = height; i >= amount; --i)
+    {
+        auto start = i * m_horizontalPixelCount;
+        for (auto j = start; j < (start + m_horizontalPixelCount); ++j)
+        {
+            m_pixelData[j] = m_pixelData[j - (m_horizontalPixelCount * amount)];
+        }
+    }
+    std::memset(m_pixelData, 0, (amount) * m_horizontalPixelCount);
+
+    updateVertices();
+}
+
 void ScreenData::clear()
 {
-    const auto pixelCount = width * height;
-    for (auto i = 0; i < pixelCount; ++i)
-    {
-        setPixel(i, 0);
-    }
+    std::memset(m_pixelData, 0, m_pixelDataSize);
+    updateVertices();
 }
 
 //private
+void ScreenData::updateVertices()
+{
+    for (auto i = 0u; i < m_pixelDataSize; ++i)
+    {
+        auto value = m_pixelData[i] * 255u;
+        sf::Color colour(value, value, value);
+
+        auto offset = i * 4;
+        m_vertexArray[offset++].color = colour;
+        m_vertexArray[offset++].color = colour;
+        m_vertexArray[offset++].color = colour;
+        m_vertexArray[offset].color = colour;
+    }
+}
+
 void ScreenData::draw(sf::RenderTarget& rt, sf::RenderStates states) const
 {
     rt.draw(m_vertexArray, m_vertexArraySize, sf::Quads, states);

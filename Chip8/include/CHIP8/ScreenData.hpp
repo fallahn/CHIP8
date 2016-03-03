@@ -27,6 +27,7 @@ source distribution.
 
 //simulates an array of pixels which can be drawn with SFML
 //chip-8 uses a resolution of 64 * 32 pixels
+//super chip extended mode allows 128 * 64 pixels
 
 #ifndef CH_SCREEN_DATA_HPP_
 #define CH_SCREEN_DATA_HPP_
@@ -50,6 +51,11 @@ public:
     void enableHires(bool);
     sf::Uint8 getHorizontalPixelCount() const { return m_horizontalPixelCount; }
     const sf::Vector2u& getResolution() const { return m_resolution; }
+    
+    void scrollLeft();
+    void scrollRight();
+    void scrollDown(sf::Uint8);
+
     void clear();
 
 private:
@@ -68,6 +74,7 @@ private:
     std::size_t m_vertexArraySize;
     sf::Uint8 m_horizontalPixelCount;
 
+    void updateVertices();
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
 };
 

@@ -341,15 +341,18 @@ void ChipEight::execute()
             break;
         //0x00FB - SCHIP, scroll screen 4px right
         case 0x00FB:
+            m_screenData.scrollRight();
             m_programCounter += 2;
             break;
         //0x00FC - SCHIP, scroll screen 4px left
         case 0x00FC:
+            m_screenData.scrollLeft();
             m_programCounter += 2;
             break;
         //0x00FD - SCHIP, exit
         case 0x00FD:
-
+            m_screenData.clear();
+            m_programCounter = 0x200;
             break;
         //0x00FE - SCHIP, disable high res mode
         case 0x00FE:
@@ -364,7 +367,8 @@ void ChipEight::execute()
         default:
             if ((currentOpcode & 0x00F0) == 0x00C0)
             {
-                //0x00CN - SCHIP, scroll scren down N lines
+                //0x00CN - SCHIP, scroll screen down N lines
+                m_screenData.scrollDown(currentOpcode & 0xF);
                 m_programCounter += 2;
             }
             break;
@@ -555,21 +559,38 @@ void ChipEight::execute()
     //each row of 8 pixels is read starting at address in register I
     //until I + N. Register 15 is set to 1 if any pixels are unset
     case 0xD000:
-        switch(currentOpcode & 0x000F)
+    {
+        auto x = m_registers[(currentOpcode & 0x0F00) >> 8];
+        auto y = m_registers[(currentOpcode & 0x00F0) >> 4];
+
+        sf::Uint16 pixel = 0;
+        m_registers[15] = 0; 
+
+        auto height = (currentOpcode & 0x000F);
+        
+        if (height == 0) //SCHIP draw
         {
-            case 0x000:
-                //SCHIP draw 16x16 sprite
-                m_programCounter += 2;
-                break;
-            default: //CHIP-8
-
-            auto x = m_registers[(currentOpcode & 0x0F00) >> 8];
-            auto y = m_registers[(currentOpcode & 0x00F0) >> 4];
-            auto height = (currentOpcode & 0x000F);
-            sf::Uint16 pixel = 0;
-
-            m_registers[15] = 0;
-
+            height = 32;
+            for (auto row = 0; row < height; row += 2)
+            {
+                pixel = (m_memory[m_indexRegister + row] << 8) | m_memory[m_indexRegister + row + 1];
+                for (auto col = 0; col < 16; ++col)
+                {
+                    if ((pixel & (0x80 >> col)) != 0)
+                    {
+                        auto pxIndex = (((y + (row)) % (m_screenData.getHorizontalPixelCount() / 2)) * m_screenData.getHorizontalPixelCount()) 
+                            + ((col + x) % m_screenData.getHorizontalPixelCount());
+                        if (m_screenData[pxIndex] == 1)
+                        {
+                            m_registers[15] = 1; //if this changed then can be assumed a collision
+                        }
+                        m_screenData.setPixel(pxIndex, m_screenData[pxIndex] ^ 1);
+                    }
+                }
+            }
+        }
+        else //CHIP-8
+        {
             for (auto row = 0; row < height; ++row)
             {
                 pixel = m_memory[m_indexRegister + row];
@@ -578,17 +599,19 @@ void ChipEight::execute()
                     //if the bit for this pixel is set...
                     if ((pixel & (0x80 >> col)) != 0)
                     {
-                        auto pxIndex = ((y + row) * m_screenData.getHorizontalPixelCount()) + (col + x);
+                        auto pxIndex = (((y + row) % (m_screenData.getHorizontalPixelCount() / 2)) * m_screenData.getHorizontalPixelCount()) 
+                            + ((col + x) % m_screenData.getHorizontalPixelCount());
                         if (m_screenData[pxIndex] == 1)
                         {
-                            m_registers[15] = 1;
+                            m_registers[15] = 1; //if this changed then can be assumed a collision
                         }
                         m_screenData.setPixel(pxIndex, m_screenData[pxIndex] ^ 1);
                     }
                 }
             }
-            m_programCounter += 2;
         }
+        m_programCounter += 2;
+    }
         break;
     case 0xE000:
         switch (currentOpcode & 0x00FF)

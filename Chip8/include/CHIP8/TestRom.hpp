@@ -106,7 +106,7 @@ static const std::vector<sf::Uint8> testRom = //TODO convert to std::array
     0xA2, 0x2F,                   //0x28E set I reg to !
     0x60, 0x1F,                   //0x290 set V0 to X coord
     0x22, 0x3A,                   //0x292 goto draw/delay sub
-    
+
     //count number of times test loops and toggle res mode
     0x73, 0x01,                   //0x294 increment demo loop counter V3
     0x33, 0x02,                   //0x296 skip instruction if V3 == 2
@@ -127,7 +127,7 @@ static const std::vector<sf::Uint8> testRom = //TODO convert to std::array
     0xF2, 0x15,                   //0x2B0 set timer to V2
     0x42, 0x00,                   //0x2B2 skip next if V2 not 0
     0x12, 0x48,                   //0x2B4 goto start
-    0xF2, 0x07,                   //0x2B6 copy timer to V2
+    0xF2, 0x07,                   //0x2B6 copy timer to V2    
     0x12, 0xB2                    //0x2B8 goto skip check
 };
 
