@@ -66,6 +66,7 @@ private:
 
     std::array<sf::Uint8, 4096u> m_memory;
     std::array<sf::Uint8, 16u> m_registers; //< V registers 0 - F. F is used for carry flag, others are general purpose
+    std::array<sf::Uint8, 16u> m_superRegisters; //< used by some superchip programs
     sf::Uint16 m_indexRegister;
     sf::Uint16 m_programCounter;
     

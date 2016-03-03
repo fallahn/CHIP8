@@ -35,12 +35,14 @@ source distribution.
 #include <fstream>
 #include <random>
 #include <iostream>
+#include <sstream>
 
 namespace
 {
     //fonts are 4px wide by 5 px high
+    //or 4px by 10px high for superchip
     //each byte represents one row in the char
-    const std::array<sf::Uint8, 80u> fontset =
+    const std::array<sf::Uint8, 240u> fontset =
     {
         0xF0, 0x90, 0x90, 0x90, 0xF0, //0
         0x20, 0x60, 0x20, 0x20, 0x70, //1
@@ -57,7 +59,25 @@ namespace
         0xF0, 0x80, 0x80, 0x80, 0xF0, //C
         0xE0, 0x90, 0x90, 0x90, 0xE0, //D
         0xF0, 0x80, 0xF0, 0x80, 0xF0, //E
-        0xF0, 0x80, 0xF0, 0x80, 0x80  //F
+        0xF0, 0x80, 0xF0, 0x80, 0x80, //F
+
+        //large font for superchip
+        0xF0, 0xF0, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0xF0, 0xF0, //0
+        0x20, 0x20, 0x60, 0x60, 0x20, 0x20, 0x20, 0x20, 0x70, 0x70, //1
+        0xF0, 0xF0, 0x10, 0x10, 0xF0, 0xF0, 0x80, 0x80, 0xF0, 0xF0, //2
+        0xF0, 0xF0, 0x10, 0x10, 0xF0, 0xF0, 0x10, 0x10, 0xF0, 0xF0, //3
+        0x90, 0x90, 0x90, 0x90, 0xF0, 0xF0, 0x10, 0x10, 0x10, 0x10, //4
+        0xF0, 0xF0, 0x80, 0x80, 0xF0, 0xF0, 0x10, 0x10, 0xF0, 0xF0, //5
+        0xF0, 0xF0, 0x80, 0x80, 0xF0, 0xF0, 0x90, 0x90, 0xF0, 0xF0, //6
+        0xF0, 0xF0, 0x10, 0x10, 0x20, 0x20, 0x40, 0x40, 0x40, 0x40, //7
+        0xF0, 0xF0, 0x90, 0x90, 0xF0, 0xF0, 0x90, 0x90, 0xF0, 0xF0, //8
+        0xF0, 0xF0, 0x90, 0x90, 0xF0, 0xF0, 0x10, 0x10, 0xF0, 0xF0, //9
+        0xF0, 0xF0, 0x90, 0x90, 0xF0, 0xF0, 0x90, 0x90, 0x90, 0x90, //A
+        0xE0, 0xE0, 0x90, 0x90, 0xE0, 0xE0, 0x90, 0x90, 0xE0, 0xE0, //B
+        0xF0, 0xF0, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0xF0, 0xF0, //C
+        0xE0, 0xE0, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0xE0, 0xE0, //D
+        0xF0, 0xF0, 0x80, 0x80, 0xF0, 0xF0, 0x80, 0x80, 0xF0, 0xF0, //E
+        0xF0, 0xF0, 0x80, 0x80, 0xF0, 0xF0, 0x80, 0x80, 0x80, 0x80  //F
     };
 
     std::default_random_engine rndEngine(static_cast<unsigned long>(std::time(0)));
@@ -308,17 +328,18 @@ void ChipEight::reset()
 
 void ChipEight::loadFontset()
 {
-    for (auto i = 0u; i < fontset.size(); ++i)
-    {
-        m_memory[i] = fontset[i];
-    }
+    std::memcpy(m_memory.data(), fontset.data(), fontset.size());
 }
 
 void ChipEight::execute()
 {
+
     //TODO replace mask values with consts
 
     Opcode currentOpcode = m_memory[m_programCounter] << 8 | m_memory[m_programCounter + 1];
+    //std::stringstream ss;
+    //ss << std::hex << currentOpcode;
+    //std::cout << ss.str() << std::endl;
 
     switch (currentOpcode & 0xF000)
     {
@@ -557,7 +578,7 @@ void ChipEight::execute()
         break;
     //case 0xDXYN - draws sprite at register X, register Y with height N
     //each row of 8 pixels is read starting at address in register I
-    //until I + N. Register 15 is set to 1 if any pixels are unset
+    //until I + N. Register 15 is set to 1 if any pixels are unset, as a collision
     case 0xD000:
     {
         auto x = m_registers[(currentOpcode & 0x0F00) >> 8];
@@ -576,9 +597,9 @@ void ChipEight::execute()
                 pixel = (m_memory[m_indexRegister + row] << 8) | m_memory[m_indexRegister + row + 1];
                 for (auto col = 0; col < 16; ++col)
                 {
-                    if ((pixel & (0x80 >> col)) != 0)
+                    if ((pixel & (0x8000 >> col)) != 0) //remember twice as wide mask :)
                     {
-                        auto pxIndex = (((y + (row)) % (m_screenData.getHorizontalPixelCount() / 2)) * m_screenData.getHorizontalPixelCount()) 
+                        auto pxIndex = (((y + (row / 2)) % (m_screenData.getHorizontalPixelCount() / 2)) * m_screenData.getHorizontalPixelCount()) 
                             + ((col + x) % m_screenData.getHorizontalPixelCount());
                         if (m_screenData[pxIndex] == 1)
                         {
@@ -658,7 +679,7 @@ void ChipEight::execute()
                     return;
                 }
             }
-        }           
+        }        
             break;
         //0xFX15 - sets delay timer to register X
         case 0x0015:
@@ -695,6 +716,7 @@ void ChipEight::execute()
             break;
         //0xFX30 - SCHIP. As FX29 but for 10px font
         case 0x0030:
+            m_indexRegister = m_registers[(currentOpcode & 0x0F00) >> 8] * 0xA + 80;
             m_programCounter += 2;
             break;
         //0xFX33 - stores the decimal representation of register X at I to I + 2
@@ -717,7 +739,7 @@ void ChipEight::execute()
             }
 
             //move I on to next operational address
-            m_indexRegister += x + 1;
+            m_indexRegister += x + 1; //TODO have read elsewhere to not do this. Needs clarification
             m_programCounter += 2;
         }
             break;
@@ -734,12 +756,29 @@ void ChipEight::execute()
             m_programCounter += 2;
         }
             break;
-        //0xFX75 - SCHIP as 0xFX55, but unclear what R is?
+        //0xFX75 - SCHIP as 0xFX55, but uses special registers
         case 0x0075:
+        {
+            auto x = (currentOpcode & 0x0F00) >> 8;
+            for (auto i = 0; i <= x; ++i)
+            {
+                m_superRegisters[i] = m_registers[i];
+            }
+
             m_programCounter += 2;
+        }
             break;
-        //0xFx85 - SCHIP as 0xFX65, but unclear what R is?
+        //0xFx85 - SCHIP as 0xFX65, but uses special registers
+        case 0x0085:
+        {
+            auto x = (currentOpcode & 0x0F00) >> 8;
+            for (auto i = 0; i <= x; ++i)
+            {
+                m_registers[i] = m_superRegisters[i];
+            }
+
             m_programCounter += 2;
+        }
             break;
         }
         break;
