@@ -46,8 +46,19 @@ ScreenData::ScreenData(sf::Uint8 pixelSize)
     m_pixelDataSize         (m_pixelDataLow.size()),
     m_vertexArray           (m_vertexArrayLow.data()),
     m_vertexArraySize       (m_vertexArrayLow.size()),
-    m_horizontalPixelCount  (64)
+    m_horizontalPixelCount  (64),
+    m_palette               (sf::Color::White, sf::Color::Black)
 {
+    m_themes = 
+    {
+        std::make_pair(sf::Color::White, sf::Color::Black),
+        std::make_pair(sf::Color(69, 84, 1), sf::Color(154, 163, 8)),
+        std::make_pair(sf::Color(191, 15, 15), sf::Color(102, 12, 12)),
+        std::make_pair(sf::Color(28, 200, 0), sf::Color(16, 75, 6)),
+        std::make_pair(sf::Color(24, 0, 204), sf::Color(12, 6, 57)),
+        std::make_pair(sf::Color::Yellow, sf::Color(156, 0, 255))
+    };
+    
     //init low res arrays
     std::memset(m_pixelDataLow.data(), 0, m_pixelDataLow.size());
 
@@ -100,15 +111,12 @@ ScreenData::ScreenData(sf::Uint8 pixelSize)
 //public
 void ScreenData::setPixel(std::size_t idx, sf::Uint8 value)
 {
-    //idx = std::min(idx, m_pixelDataSize - 1);
-    
     assert(value < 2);
     m_pixelData[idx] = value;
 
-    value *= 255u;
     idx *= 4u;
 
-    sf::Color colour(value, value, value);
+    sf::Color colour = (value > 0) ? m_palette.first : m_palette.second;
     m_vertexArray[idx++].color = colour;
     m_vertexArray[idx++].color = colour;
     m_vertexArray[idx++].color = colour;
@@ -201,8 +209,8 @@ void ScreenData::updateVertices()
 {
     for (auto i = 0u; i < m_pixelDataSize; ++i)
     {
-        auto value = m_pixelData[i] * 255u;
-        sf::Color colour(value, value, value);
+        auto value = m_pixelData[i];
+        sf::Color colour = (value > 0) ? m_palette.first : m_palette.second;
 
         auto offset = i * 4;
         m_vertexArray[offset++].color = colour;

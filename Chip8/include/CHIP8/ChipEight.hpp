@@ -60,6 +60,7 @@ public:
     void draw(sf::RenderTarget&) override;
 
     void load(const std::string&);
+    void setTheme(ScreenData::Theme theme) { m_screenData.setTheme(theme); }
 
 private:
     using Opcode = sf::Uint16;

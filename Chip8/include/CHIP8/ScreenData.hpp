@@ -36,6 +36,7 @@ source distribution.
 #include <SFML/Graphics/Vertex.hpp>
 
 #include <array>
+#include <utility>
 
 class ScreenData final : public sf::Drawable
 {
@@ -58,6 +59,17 @@ public:
 
     void clear();
 
+    enum Theme
+    {
+        Classic = 0,
+        Gameboy,
+        Red,
+        Green,
+        Blue,
+        Contrast
+    };
+    void setTheme(Theme theme) { m_palette = m_themes[theme]; updateVertices(); }
+
 private:
 
     sf::Vector2u m_resolution; //< the actual resolution in SFML units
@@ -73,6 +85,10 @@ private:
     sf::Vertex* m_vertexArray;
     std::size_t m_vertexArraySize;
     sf::Uint8 m_horizontalPixelCount;
+
+    using Palette = std::pair<sf::Color, sf::Color>;
+    std::array<Palette, 6u> m_themes;
+    Palette m_palette;
 
     void updateVertices();
     void draw(sf::RenderTarget&, sf::RenderStates) const override;
