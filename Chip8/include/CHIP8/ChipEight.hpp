@@ -57,7 +57,7 @@ public:
 
     void handleEvent(const sf::Event&) override;
     void update(float) override;
-    void draw(sf::RenderTarget&) const override;
+    void draw(sf::RenderTarget&) override;
 
     void load(const std::string&);
 

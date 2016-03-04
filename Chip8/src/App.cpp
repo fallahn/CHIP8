@@ -33,8 +33,9 @@ source distribution.
 #include <cassert>
 
 App::App()
+    : m_menuState(m_renderWindow, m_chipEight)
 {
-
+    
 }
 
 //public
@@ -44,6 +45,7 @@ void App::run()
     m_renderWindow.setVerticalSyncEnabled(true);
 
     m_states.push_back(&m_chipEight);
+    m_states.push_back(&m_menuState);
 
     sf::Clock clock;
     sf::Event evt;
@@ -116,7 +118,7 @@ void App::update(float dt)
 
 void App::draw()
 {
-    m_renderWindow.clear(sf::Color(40u, 51u, 36u));
+    m_renderWindow.clear();
     for (const auto& state : m_states)
     {
         state->draw(m_renderWindow);

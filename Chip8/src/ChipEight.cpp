@@ -258,7 +258,7 @@ void ChipEight::update(float dt)
     }
 }
 
-void ChipEight::draw(sf::RenderTarget& rt) const
+void ChipEight::draw(sf::RenderTarget& rt)
 {
     rt.draw(m_screenData);
 }
@@ -320,10 +320,14 @@ void ChipEight::reset()
     std::memset(m_registers.data(), 0u, m_registers.size());
     std::memset(m_stack.data(), 0u, m_stack.size() * sizeof(sf::Uint16));
     
-    m_screenData.clear();
-
+    m_indexRegister = 0;
+    m_programCounter = 0x200;
     m_delayTimer = 0u;
     m_soundTimer = 0u;
+    m_stackPointer = 0;   
+
+    m_screenData.enableHires(false); //allow game to choose
+    m_screenData.clear();
 }
 
 void ChipEight::loadFontset()

@@ -44,7 +44,7 @@ public:
 
     virtual void handleEvent(const sf::Event&) = 0;
     virtual void update(float) = 0;
-    virtual void draw(sf::RenderTarget&) const = 0;
+    virtual void draw(sf::RenderTarget&) = 0;
 
     enum class Action
     {

@@ -95,7 +95,7 @@ static const std::vector<sf::Uint8> testRom = //TODO convert to std::array
     0x60, 0x0E,                   //0x278 set V0 to X coord
     0x22, 0x3A,                   //0x27A goto draw/delay sub
     0xA2, 0x2A,                   //0x27C set I reg to T
-    0x60, 0x14,                   //0x27E set V0 to X coord
+    0x60, 0x13,                   //0x27E set V0 to X coord
     0x22, 0x3A,                   //0x280 goto draw/delay sub
     0xA2, 0x1B,                   //0x282 set I reg to O
     0x60, 0x19,                   //0x284 set V0 to X coord

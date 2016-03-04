@@ -30,17 +30,26 @@ source distribution.
 
 #include <CHIP8/State.hpp>
 
+#include <SFGUI/Desktop.hpp>
+#include <SFGUI/SFGUI.hpp>
+
+class ChipEight;
 class MenuState final : public State
 {
 public:
-    MenuState();
+    MenuState(sf::RenderWindow&, ChipEight&);
     ~MenuState() = default;
 
     void handleEvent(const sf::Event&) override;
     void update(float) override;
-    void draw(sf::RenderTarget&) const override;
+    void draw(sf::RenderTarget&) override;
 
 private:
+    sf::RenderWindow& m_renderWindow;
+    ChipEight& m_chipEight;
+
+    sfg::SFGUI m_sfg;
+    sfg::Desktop m_desktop;
 };
 
 #endif //CH_MENU_STATE_HPP_
