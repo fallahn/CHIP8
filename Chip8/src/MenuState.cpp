@@ -38,6 +38,7 @@ source distribution.
 #include <SFGUI/Box.hpp>
 #include <SFGUI/Button.hpp>
 #include <SFGUI/CheckButton.hpp>
+#include <SFGUI/Label.hpp>
 
 MenuState::MenuState(sf::RenderWindow& rw, ChipEight& ce)
     : m_renderWindow    (rw),
@@ -63,6 +64,28 @@ MenuState::MenuState(sf::RenderWindow& rw, ChipEight& ce)
     }
     gameList->SelectItem(0);
     leftbox->Pack(gameList, false, true);
+
+    auto themeLabel = sfg::Label::Create("Theme: ");
+
+    auto themeCombo = sfg::ComboBox::Create();
+    themeCombo->AppendItem("Classic");
+    themeCombo->AppendItem("Gameboy");
+    themeCombo->AppendItem("Red");
+    themeCombo->AppendItem("Green");
+    themeCombo->AppendItem("Blue");
+    themeCombo->AppendItem("Contrast");
+    themeCombo->SelectItem(0);
+    themeCombo->GetSignal(sfg::ComboBox::OnSelect).Connect
+        (
+            [this, themeCombo]()
+    {
+        m_chipEight.setTheme(ScreenData::Theme(themeCombo->GetSelectedItem()));
+    }
+    );
+    auto themeBox = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 6.f);
+    themeBox->Pack(themeLabel, false);
+    themeBox->Pack(themeCombo, false, false);
+    leftbox->Pack(themeBox, false);
 
     auto vsync = sfg::CheckButton::Create("V-Sync");
     vsync->SetActive(true);
@@ -100,7 +123,6 @@ MenuState::MenuState(sf::RenderWindow& rw, ChipEight& ce)
             frameLimiter->SetActive(false);
         }
     );
-
 
     mainbox->Pack(leftbox);
 
